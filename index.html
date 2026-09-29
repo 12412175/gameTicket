@@ -112,7 +112,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 5px;
+      gap: 3px;
       transition: all 0.15s;
       cursor: pointer;
       box-shadow: none;
@@ -210,7 +210,6 @@
       opacity: 0.7;
     }
 
-    /* 卡片内的图片（数字5~7） */
     .card .card-img {
       width: 70%;
       height: 70%;
@@ -218,7 +217,6 @@
       display: block;
     }
 
-    /* 图片下方的积分文字 */
     .card .img-points {
       font-size: 0.72rem;
       font-weight: 500;
@@ -244,33 +242,36 @@
       min-height: 40px;
     }
 
-    /* 重置按钮 */
-    .reset-area {
+    /* 按钮区域 */
+    .button-area {
       display: flex;
       justify-content: center;
+      gap: 8px;
       margin-top: 12px;
     }
 
-    .reset-btn {
+    .action-btn {
       background: #d6d2cb;
       border: 1px solid #c2bbb3;
       border-radius: 40px;
-      padding: 12px 32px;
-      font-size: 1rem;
+      padding: 10px 20px;
+      font-size: 0.9rem;
       font-weight: 500;
       color: #5f5a55;
       transition: all 0.15s;
       cursor: pointer;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       box-shadow: none;
+      flex: 1;
+      max-width: 110px;
     }
 
-    .reset-btn:active {
+    .action-btn:active {
       background: #cbc4bc;
       transform: scale(0.97);
     }
 
-    /* 收集栏（12个png显示位） - 仅在开始界面显示 */
+    /* 收集栏 - 仅在开始界面显示，无文字 */
     .collection-section {
       margin-top: 18px;
       padding: 0 4px;
@@ -303,17 +304,6 @@
 
     .collection-slot.unlocked img {
       display: block;
-    }
-
-    .collection-slot .slot-label {
-      font-size: 0.55rem;
-      color: #b1a69b;
-      text-align: center;
-      line-height: 1.2;
-    }
-
-    .collection-slot.unlocked .slot-label {
-      display: none;
     }
 
     /* 隐藏类 */
@@ -351,35 +341,6 @@
       box-shadow: none;
     }
 
-    /* 弹窗内容：显示对应积分 */
-    .modal-reward {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .modal-reward-label {
-      font-size: 0.85rem;
-      color: #9a928a;
-      letter-spacing: 0.5px;
-    }
-
-    .modal-reward-value {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 2rem;
-      font-weight: 600;
-      color: #6b8c7c;
-    }
-
-    .modal-reward-value span {
-      font-size: 2.2rem;
-      line-height: 1;
-    }
-
     /* 弹窗内数字/图案展示 */
     .modal-number-display {
       margin-bottom: 16px;
@@ -400,22 +361,21 @@
       padding: 6px;
     }
 
-    .modal-pngs {
+    /* 弹窗内积分显示（无"获得积分"文字） */
+    .modal-reward-value {
       display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+      align-items: center;
       justify-content: center;
+      gap: 6px;
+      font-size: 2rem;
+      font-weight: 600;
+      color: #6b8c7c;
       margin-bottom: 20px;
-      min-height: 10px;
     }
 
-    .modal-pngs img {
-      width: 52px;
-      height: 52px;
-      object-fit: contain;
-      background-color: #ddd8d2;
-      border-radius: 10px;
-      padding: 4px;
+    .modal-reward-value span {
+      font-size: 2.2rem;
+      line-height: 1;
     }
 
     .modal-btn {
@@ -444,7 +404,7 @@
     <!-- 积分栏 -->
     <div class="score-bar">
       <div class="score-left">
-        <span class="score-label">记录</span>
+        <span class="score-label">历史最高</span>
         <div class="high-score">
           <span>🌱</span>
           <span id="highScoreDisplay">20</span>
@@ -459,18 +419,10 @@
     <!-- 档位选择 -->
     <div id="tierSection" class="tier-section">
       <div class="tier-buttons">
-        <button class="tier-btn" data-tier="1">
-          </span>-1<span class="emoji">🌱
-        </button>
-        <button class="tier-btn" data-tier="5">
-          </span>-5<span class="emoji">🌱
-        </button>
-        <button class="tier-btn" data-tier="10">
-          </span>-10<span class="emoji">🌱
-        </button>
-        <button class="tier-btn" data-tier="25">
-          </span>-25<span class="emoji">🌱
-        </button>
+        <button class="tier-btn" data-tier="1">-1<span class="emoji">🌱</span></button>
+        <button class="tier-btn" data-tier="5">-5<span class="emoji">🌱</span></button>
+        <button class="tier-btn" data-tier="10">-10<span class="emoji">🌱</span></button>
+        <button class="tier-btn" data-tier="25">-25<span class="emoji">🌱</span></button>
       </div>
     </div>
 
@@ -480,12 +432,14 @@
       <div id="gameOverMsg" class="game-over-message"></div>
     </div>
 
-    <!-- 重置按钮 -->
-    <div class="reset-area">
-      <button id="resetBtn" class="reset-btn">重新开始</button>
+    <!-- 按钮区域：存档、读档、重新开始 -->
+    <div class="button-area">
+      <button id="saveBtn" class="action-btn">存档</button>
+      <button id="loadBtn" class="action-btn">读档</button>
+      <button id="resetBtn" class="action-btn">重新开始</button>
     </div>
 
-    <!-- 收集栏：12个png显示位（仅在开始界面显示） -->
+    <!-- 收集栏：12个png显示位（仅在开始界面显示，无文字） -->
     <div id="collectionSection" class="collection-section">
       <div class="collection-grid" id="collectionGrid"></div>
     </div>
@@ -497,11 +451,9 @@
       <!-- 显示翻出的三个相同数字/图案 -->
       <div class="modal-number-display" id="modalNumberDisplay"></div>
       <!-- 显示对应积分 -->
-      <div class="modal-reward">
-        <div class="modal-reward-value">
-          <span>🌱</span>
-          <span id="modalScoreValue">0</span>
-        </div>
+      <div class="modal-reward-value">
+        <span>🌱</span>
+        <span id="modalScoreValue">0</span>
       </div>
       <button class="modal-btn" id="modalCloseBtn">确定</button>
     </div>
@@ -528,10 +480,22 @@
       const TIERS = [1, 5, 10, 25];
       const HIGH_NUMS = [5, 6, 7];
 
-      // 生成图片文件名
+      // 本地存储键名
+      const STORAGE_KEY = 'fanfanle_save';
+
       function getImgFileName(tier, num) {
         return `${tier}-${num}.png`;
       }
+
+      // ---------- 预加载所有图片 ----------
+      const preloadImages = [];
+      TIERS.forEach(tier => {
+        HIGH_NUMS.forEach(num => {
+          const img = new Image();
+          img.src = IMG_BASE + getImgFileName(tier, num);
+          preloadImages.push(img);
+        });
+      });
 
       // 状态变量
       let currentScore = 20;
@@ -542,7 +506,6 @@
       let cardState = [];
       let gameActive = false;
       let roundEnding = false;
-      let roundUnlockedPngs = [];
 
       // DOM 元素
       const scoreDisplay = document.getElementById('scoreDisplay');
@@ -552,16 +515,17 @@
       const boardEl = document.getElementById('board');
       const gameOverMsg = document.getElementById('gameOverMsg');
       const resetBtn = document.getElementById('resetBtn');
+      const saveBtn = document.getElementById('saveBtn');
+      const loadBtn = document.getElementById('loadBtn');
       const tierButtons = document.querySelectorAll('.tier-btn');
       const collectionSection = document.getElementById('collectionSection');
       const collectionGrid = document.getElementById('collectionGrid');
       const gameOverModal = document.getElementById('gameOverModal');
       const modalNumberDisplay = document.getElementById('modalNumberDisplay');
       const modalScoreValue = document.getElementById('modalScoreValue');
-      const modalPngs = document.getElementById('modalPngs');
       const modalCloseBtn = document.getElementById('modalCloseBtn');
 
-      // 初始化收集栏
+      // 初始化收集栏（无文字，只显示图片）
       function initCollectionGrid() {
         collectionGrid.innerHTML = '';
         TIERS.forEach(tier => {
@@ -572,10 +536,8 @@
             slot.dataset.num = num;
             const img = document.createElement('img');
             img.src = IMG_BASE + getImgFileName(tier, num);
-            const label = document.createElement('span');
-            label.className = 'slot-label';
+            img.alt = `${tier}-${num}`;
             slot.appendChild(img);
-            slot.appendChild(label);
             collectionGrid.appendChild(slot);
           });
         });
@@ -587,19 +549,110 @@
         if (slot) {
           slot.classList.add('unlocked');
         }
-        const key = `${tier}-${num}`;
-        if (!roundUnlockedPngs.some(p => p.key === key)) {
-          roundUnlockedPngs.push({ key, tier, num });
-        }
       }
 
-      // 更新积分UI
+      // 更新积分UI，历史最高时自动存档
       function updateScoreUI() {
         scoreDisplay.textContent = currentScore;
         if (currentScore > highScore) {
           highScore = currentScore;
+          // 自动存档
+          autoSave();
         }
         highScoreDisplay.textContent = highScore;
+      }
+
+      // 自动存档（保存历史最高和解锁状态）
+      function autoSave() {
+        try {
+          const unlocked = [];
+          document.querySelectorAll('.collection-slot.unlocked').forEach(slot => {
+            unlocked.push(`${slot.dataset.tier}-${slot.dataset.num}`);
+          });
+          const saveData = {
+            highScore: highScore,
+            unlocked: unlocked
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
+        } catch (e) {
+          // localStorage 不可用时忽略
+        }
+      }
+
+      // 手动存档
+      function manualSave() {
+        autoSave();
+        // 视觉反馈
+        saveBtn.textContent = '已存';
+        setTimeout(() => {
+          saveBtn.textContent = '存档';
+        }, 800);
+      }
+
+      // 读档
+      function manualLoad() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) {
+            loadBtn.textContent = '无档';
+            setTimeout(() => {
+              loadBtn.textContent = '读档';
+            }, 800);
+            return;
+          }
+          const saveData = JSON.parse(raw);
+          if (saveData.highScore !== undefined) {
+            highScore = saveData.highScore;
+            if (currentScore > highScore) {
+              currentScore = highScore;
+            }
+          }
+          // 恢复解锁状态
+          document.querySelectorAll('.collection-slot').forEach(slot => {
+            slot.classList.remove('unlocked');
+          });
+          if (saveData.unlocked && Array.isArray(saveData.unlocked)) {
+            saveData.unlocked.forEach(key => {
+              const [tier, num] = key.split('-');
+              const slot = collectionGrid.querySelector(`.collection-slot[data-tier="${tier}"][data-num="${num}"]`);
+              if (slot) slot.classList.add('unlocked');
+            });
+          }
+          updateScoreUI();
+          loadBtn.textContent = '已读';
+          setTimeout(() => {
+            loadBtn.textContent = '读档';
+          }, 800);
+        } catch (e) {
+          loadBtn.textContent = '失败';
+          setTimeout(() => {
+            loadBtn.textContent = '读档';
+          }, 800);
+        }
+      }
+
+      // 初始化时尝试读取存档
+      function initFromStorage() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const saveData = JSON.parse(raw);
+            if (saveData.highScore !== undefined) {
+              highScore = saveData.highScore;
+              currentScore = 20;
+              if (saveData.unlocked && Array.isArray(saveData.unlocked)) {
+                saveData.unlocked.forEach(key => {
+                  const [tier, num] = key.split('-');
+                  const slot = collectionGrid.querySelector(`.collection-slot[data-tier="${tier}"][data-num="${num}"]`);
+                  if (slot) slot.classList.add('unlocked');
+                });
+              }
+            }
+          }
+        } catch (e) {
+          // 忽略
+        }
+        updateScoreUI();
       }
 
       function shuffleArray(arr) {
@@ -652,13 +705,11 @@
         boardCards = [];
         gameActive = false;
         roundEnding = false;
-        roundUnlockedPngs = [];
       }
 
-      // 完全重置
+      // 完全重置（不重置历史最高，只重置当前积分）
       function fullReset() {
         currentScore = 20;
-        highScore = 20;
         updateScoreUI();
         selectedTier = null;
         tierButtons.forEach(btn => btn.classList.remove('selected'));
@@ -672,10 +723,6 @@
         boardCards = [];
         gameActive = false;
         roundEnding = false;
-        roundUnlockedPngs = [];
-        document.querySelectorAll('.collection-slot').forEach(slot => {
-          slot.classList.remove('unlocked');
-        });
       }
 
       // 开始游戏
@@ -692,7 +739,6 @@
         cardState = new Array(20).fill('hidden');
         gameActive = true;
         roundEnding = false;
-        roundUnlockedPngs = [];
 
         renderBoard();
         tierSection.classList.add('hidden');
@@ -779,9 +825,9 @@
 
           if (num >= 5 && num <= 7) {
             unlockPngSlot(selectedTier, num);
+            autoSave(); // 解锁新图案时自动存档
           }
 
-          // 弹出弹窗，显示翻出的数字/图案和对应积分
           setTimeout(() => {
             showGameOverModal(num, reward);
           }, 600);
@@ -790,7 +836,6 @@
 
       // 显示弹窗：显示翻出的三个相同数字/图案 和 对应积分
       function showGameOverModal(num, reward) {
-        // 显示数字/图案
         modalNumberDisplay.innerHTML = '';
         if (num >= 5 && num <= 7) {
           const img = document.createElement('img');
@@ -804,20 +849,7 @@
           modalNumberDisplay.appendChild(span);
         }
 
-        // 显示对应积分
         modalScoreValue.textContent = reward;
-
-        // 显示本轮解锁的png（如果有）
-        modalPngs.innerHTML = '';
-        if (roundUnlockedPngs.length > 0) {
-          roundUnlockedPngs.forEach(p => {
-            const img = document.createElement('img');
-            img.src = IMG_BASE + getImgFileName(p.tier, p.num);
-            img.alt = `${p.tier}-${p.num}`;
-            modalPngs.appendChild(img);
-          });
-        }
-
         gameOverModal.classList.remove('hidden');
       }
 
@@ -844,14 +876,15 @@
         });
       });
 
-      // 重置按钮
+      // 按钮事件
       resetBtn.addEventListener('click', fullReset);
-
-      // 弹窗确定按钮
+      saveBtn.addEventListener('click', manualSave);
+      loadBtn.addEventListener('click', manualLoad);
       modalCloseBtn.addEventListener('click', closeModalAndReset);
 
       // 初始化
       initCollectionGrid();
+      initFromStorage();
       updateScoreUI();
     })();
   </script>
