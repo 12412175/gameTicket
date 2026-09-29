@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>翻翻乐 · 莫兰迪扁平</title>
+  <title>翻翻卡</title>
   <style>
     * {
       margin: 0;
@@ -444,7 +444,7 @@
     <!-- 积分栏 -->
     <div class="score-bar">
       <div class="score-left">
-        <span class="score-label">历史最高</span>
+        <span class="score-label">记录</span>
         <div class="high-score">
           <span>🌱</span>
           <span id="highScoreDisplay">20</span>
@@ -460,16 +460,16 @@
     <div id="tierSection" class="tier-section">
       <div class="tier-buttons">
         <button class="tier-btn" data-tier="1">
-          <span class="emoji">🌱</span>-1
+          </span>-1<span class="emoji">🌱
         </button>
         <button class="tier-btn" data-tier="5">
-          <span class="emoji">🌱</span>-5
+          </span>-5<span class="emoji">🌱
         </button>
         <button class="tier-btn" data-tier="10">
-          <span class="emoji">🌱</span>-10
+          </span>-10<span class="emoji">🌱
         </button>
         <button class="tier-btn" data-tier="25">
-          <span class="emoji">🌱</span>-25
+          </span>-25<span class="emoji">🌱
         </button>
       </div>
     </div>
@@ -498,14 +498,11 @@
       <div class="modal-number-display" id="modalNumberDisplay"></div>
       <!-- 显示对应积分 -->
       <div class="modal-reward">
-        <div class="modal-reward-label">获得积分</div>
         <div class="modal-reward-value">
           <span>🌱</span>
           <span id="modalScoreValue">0</span>
         </div>
       </div>
-      <!-- 如有解锁图案则显示 -->
-      <div class="modal-pngs" id="modalPngs"></div>
       <button class="modal-btn" id="modalCloseBtn">确定</button>
     </div>
   </div>
@@ -575,10 +572,8 @@
             slot.dataset.num = num;
             const img = document.createElement('img');
             img.src = IMG_BASE + getImgFileName(tier, num);
-            img.alt = `${tier}档位 ${num}`;
             const label = document.createElement('span');
             label.className = 'slot-label';
-            label.textContent = `${tier}·${num}`;
             slot.appendChild(img);
             slot.appendChild(label);
             collectionGrid.appendChild(slot);
