@@ -436,10 +436,9 @@
       <div id="gameOverMsg" class="game-over-message"></div>
     </div>
 
-    <!-- 按钮区域：重开、重新开始 -->
+    <!-- 按钮区域：重开 -->
     <div class="button-area">
       <button id="hardResetBtn" class="action-btn">重开</button>
-      <button id="resetBtn" class="action-btn">重新开始</button>
     </div>
 
     <!-- 收集栏：12个png显示位（仅在开始界面显示，无文字） -->
@@ -473,7 +472,7 @@
       };
 
       // 数字出现概率权重
-      const WEIGHTS = [15, 15, 15, 15, 15, 15, 10];
+      const WEIGHTS = [18, 17, 16, 15, 14, 12, 8];
       const WEIGHT_TOTAL = WEIGHTS.reduce((a, b) => a + b, 0);
 
       // 图片基础路径
@@ -511,7 +510,7 @@
       let isPointerDown = false;
       let pointerStartIndex = -1;
       let lastFlippedIndex = -1;
-      let swipeDirection = null; // 'left', 'right', 'up', 'down'
+      let swipeDirection = null;
       let swipeMoved = false;
 
       // DOM 元素
@@ -521,7 +520,6 @@
       const boardSection = document.getElementById('boardSection');
       const boardEl = document.getElementById('board');
       const gameOverMsg = document.getElementById('gameOverMsg');
-      const resetBtn = document.getElementById('resetBtn');
       const hardResetBtn = document.getElementById('hardResetBtn');
       const tierButtons = document.querySelectorAll('.tier-btn');
       const collectionSection = document.getElementById('collectionSection');
@@ -603,29 +601,6 @@
 
       // 重置到开始界面
       function resetToStart() {
-        updateScoreUI();
-        selectedTier = null;
-        tierButtons.forEach(btn => btn.classList.remove('selected'));
-        boardSection.classList.add('hidden');
-        tierSection.classList.remove('hidden');
-        collectionSection.classList.remove('hidden');
-        gameOverMsg.textContent = '';
-        boardEl.innerHTML = '';
-        cardElements = [];
-        cardState = [];
-        boardCards = [];
-        gameActive = false;
-        roundEnding = false;
-        isPointerDown = false;
-        pointerStartIndex = -1;
-        lastFlippedIndex = -1;
-        swipeDirection = null;
-        swipeMoved = false;
-      }
-
-      // 重新开始（不重置历史最高和收集栏，只重置当前积分）
-      function fullReset() {
-        currentScore = 20;
         updateScoreUI();
         selectedTier = null;
         tierButtons.forEach(btn => btn.classList.remove('selected'));
@@ -904,13 +879,11 @@
         }
       }
 
-      // 卡片点击处理（保留原有点击逻辑）
+      // 卡片点击处理
       function onCardClick(index) {
         if (!gameActive || roundEnding) return;
         if (cardState[index] === 'matched') return;
         if (cardState[index] === 'flipped') return;
-
-        // 如果已经通过滑动翻开了这张卡，就不再处理
         if (cardState[index] !== 'hidden') return;
 
         flipCard(index);
@@ -919,7 +892,6 @@
       // 显示弹窗：显示三个相同数字/图案 和 对应积分
       function showGameOverModal(num, reward) {
         modalNumberDisplay.innerHTML = '';
-        // 三个并排显示
         for (let k = 0; k < 3; k++) {
           if (num >= 5 && num <= 7) {
             const img = document.createElement('img');
@@ -962,7 +934,6 @@
       });
 
       // 按钮事件
-      resetBtn.addEventListener('click', fullReset);
       hardResetBtn.addEventListener('click', hardReset);
       modalCloseBtn.addEventListener('click', closeModalAndReset);
 
