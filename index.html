@@ -263,7 +263,7 @@
       letter-spacing: 0.5px;
       box-shadow: none;
       flex: 1;
-      max-width: 110px;
+      max-width: 130px;
     }
 
     .action-btn:active {
@@ -341,9 +341,13 @@
       box-shadow: none;
     }
 
-    /* 弹窗内数字/图案展示 */
+    /* 弹窗内数字/图案展示 - 三个并排 */
     .modal-number-display {
       margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     .modal-number-display .num-text {
@@ -353,8 +357,8 @@
     }
 
     .modal-number-display img {
-      width: 72px;
-      height: 72px;
+      width: 64px;
+      height: 64px;
       object-fit: contain;
       background-color: #ddd8d2;
       border-radius: 12px;
@@ -432,10 +436,9 @@
       <div id="gameOverMsg" class="game-over-message"></div>
     </div>
 
-    <!-- 按钮区域：存档、读档、重新开始 -->
+    <!-- 按钮区域：重开、重新开始 -->
     <div class="button-area">
-      <button id="saveBtn" class="action-btn">存档</button>
-      <button id="loadBtn" class="action-btn">读档</button>
+      <button id="hardResetBtn" class="action-btn">重开</button>
       <button id="resetBtn" class="action-btn">重新开始</button>
     </div>
 
@@ -470,7 +473,7 @@
       };
 
       // 数字出现概率权重
-      const WEIGHTS = [20, 20, 20, 15, 15, 5, 5];
+      const WEIGHTS = [15, 15, 15, 15, 15, 15, 10];
       const WEIGHT_TOTAL = WEIGHTS.reduce((a, b) => a + b, 0);
 
       // 图片基础路径
@@ -479,9 +482,6 @@
       // 档位列表和数字5~7
       const TIERS = [1, 5, 10, 25];
       const HIGH_NUMS = [5, 6, 7];
-
-      // 本地存储键名
-      const STORAGE_KEY = 'fanfanle_save';
 
       function getImgFileName(tier, num) {
         return `${tier}-${num}.png`;
@@ -507,6 +507,13 @@
       let gameActive = false;
       let roundEnding = false;
 
+      // 滑动翻卡相关
+      let isPointerDown = false;
+      let pointerStartIndex = -1;
+      let lastFlippedIndex = -1;
+      let swipeDirection = null; // 'left', 'right', 'up', 'down'
+      let swipeMoved = false;
+
       // DOM 元素
       const scoreDisplay = document.getElementById('scoreDisplay');
       const highScoreDisplay = document.getElementById('highScoreDisplay');
@@ -515,8 +522,7 @@
       const boardEl = document.getElementById('board');
       const gameOverMsg = document.getElementById('gameOverMsg');
       const resetBtn = document.getElementById('resetBtn');
-      const saveBtn = document.getElementById('saveBtn');
-      const loadBtn = document.getElementById('loadBtn');
+      const hardResetBtn = document.getElementById('hardResetBtn');
       const tierButtons = document.querySelectorAll('.tier-btn');
       const collectionSection = document.getElementById('collectionSection');
       const collectionGrid = document.getElementById('collectionGrid');
@@ -551,108 +557,13 @@
         }
       }
 
-      // 更新积分UI，历史最高时自动存档
+      // 更新积分UI
       function updateScoreUI() {
         scoreDisplay.textContent = currentScore;
         if (currentScore > highScore) {
           highScore = currentScore;
-          // 自动存档
-          autoSave();
         }
         highScoreDisplay.textContent = highScore;
-      }
-
-      // 自动存档（保存历史最高和解锁状态）
-      function autoSave() {
-        try {
-          const unlocked = [];
-          document.querySelectorAll('.collection-slot.unlocked').forEach(slot => {
-            unlocked.push(`${slot.dataset.tier}-${slot.dataset.num}`);
-          });
-          const saveData = {
-            highScore: highScore,
-            unlocked: unlocked
-          };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(saveData));
-        } catch (e) {
-          // localStorage 不可用时忽略
-        }
-      }
-
-      // 手动存档
-      function manualSave() {
-        autoSave();
-        // 视觉反馈
-        saveBtn.textContent = '已存';
-        setTimeout(() => {
-          saveBtn.textContent = '存档';
-        }, 800);
-      }
-
-      // 读档
-      function manualLoad() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (!raw) {
-            loadBtn.textContent = '无档';
-            setTimeout(() => {
-              loadBtn.textContent = '读档';
-            }, 800);
-            return;
-          }
-          const saveData = JSON.parse(raw);
-          if (saveData.highScore !== undefined) {
-            highScore = saveData.highScore;
-            if (currentScore > highScore) {
-              currentScore = highScore;
-            }
-          }
-          // 恢复解锁状态
-          document.querySelectorAll('.collection-slot').forEach(slot => {
-            slot.classList.remove('unlocked');
-          });
-          if (saveData.unlocked && Array.isArray(saveData.unlocked)) {
-            saveData.unlocked.forEach(key => {
-              const [tier, num] = key.split('-');
-              const slot = collectionGrid.querySelector(`.collection-slot[data-tier="${tier}"][data-num="${num}"]`);
-              if (slot) slot.classList.add('unlocked');
-            });
-          }
-          updateScoreUI();
-          loadBtn.textContent = '已读';
-          setTimeout(() => {
-            loadBtn.textContent = '读档';
-          }, 800);
-        } catch (e) {
-          loadBtn.textContent = '失败';
-          setTimeout(() => {
-            loadBtn.textContent = '读档';
-          }, 800);
-        }
-      }
-
-      // 初始化时尝试读取存档
-      function initFromStorage() {
-        try {
-          const raw = localStorage.getItem(STORAGE_KEY);
-          if (raw) {
-            const saveData = JSON.parse(raw);
-            if (saveData.highScore !== undefined) {
-              highScore = saveData.highScore;
-              currentScore = 20;
-              if (saveData.unlocked && Array.isArray(saveData.unlocked)) {
-                saveData.unlocked.forEach(key => {
-                  const [tier, num] = key.split('-');
-                  const slot = collectionGrid.querySelector(`.collection-slot[data-tier="${tier}"][data-num="${num}"]`);
-                  if (slot) slot.classList.add('unlocked');
-                });
-              }
-            }
-          }
-        } catch (e) {
-          // 忽略
-        }
-        updateScoreUI();
       }
 
       function shuffleArray(arr) {
@@ -705,9 +616,14 @@
         boardCards = [];
         gameActive = false;
         roundEnding = false;
+        isPointerDown = false;
+        pointerStartIndex = -1;
+        lastFlippedIndex = -1;
+        swipeDirection = null;
+        swipeMoved = false;
       }
 
-      // 完全重置（不重置历史最高，只重置当前积分）
+      // 重新开始（不重置历史最高和收集栏，只重置当前积分）
       function fullReset() {
         currentScore = 20;
         updateScoreUI();
@@ -723,6 +639,39 @@
         boardCards = [];
         gameActive = false;
         roundEnding = false;
+        isPointerDown = false;
+        pointerStartIndex = -1;
+        lastFlippedIndex = -1;
+        swipeDirection = null;
+        swipeMoved = false;
+      }
+
+      // 重开：重置所有状态到初始（历史最高和收集栏位清零）
+      function hardReset() {
+        currentScore = 20;
+        highScore = 20;
+        updateScoreUI();
+        selectedTier = null;
+        tierButtons.forEach(btn => btn.classList.remove('selected'));
+        boardSection.classList.add('hidden');
+        tierSection.classList.remove('hidden');
+        collectionSection.classList.remove('hidden');
+        gameOverMsg.textContent = '';
+        boardEl.innerHTML = '';
+        cardElements = [];
+        cardState = [];
+        boardCards = [];
+        gameActive = false;
+        roundEnding = false;
+        isPointerDown = false;
+        pointerStartIndex = -1;
+        lastFlippedIndex = -1;
+        swipeDirection = null;
+        swipeMoved = false;
+        // 清除所有解锁状态
+        document.querySelectorAll('.collection-slot').forEach(slot => {
+          slot.classList.remove('unlocked');
+        });
       }
 
       // 开始游戏
@@ -745,6 +694,13 @@
         boardSection.classList.remove('hidden');
         collectionSection.classList.add('hidden');
         gameOverMsg.textContent = '';
+
+        // 重置滑动状态
+        isPointerDown = false;
+        pointerStartIndex = -1;
+        lastFlippedIndex = -1;
+        swipeDirection = null;
+        swipeMoved = false;
       }
 
       // 渲染卡片
@@ -759,13 +715,122 @@
           boardEl.appendChild(card);
           cardElements.push(card);
         }
+        // 绑定滑动事件
+        bindSwipeEvents();
       }
 
-      // 卡片点击处理
-      function onCardClick(index) {
+      // 绑定滑动事件
+      function bindSwipeEvents() {
+        boardEl.addEventListener('pointerdown', handlePointerDown);
+        boardEl.addEventListener('pointermove', handlePointerMove);
+        boardEl.addEventListener('pointerup', handlePointerUp);
+        boardEl.addEventListener('pointercancel', handlePointerUp);
+        // 防止触摸时滚动
+        boardEl.addEventListener('touchstart', (e) => { e.preventDefault(); }, { passive: false });
+      }
+
+      // 根据坐标获取卡片索引
+      function getCardIndexFromPoint(x, y) {
+        const rect = boardEl.getBoundingClientRect();
+        const relX = x - rect.left;
+        const relY = y - rect.top;
+        if (relX < 0 || relY < 0 || relX > rect.width || relY > rect.height) return -1;
+
+        const cols = 4;
+        const rows = 5;
+        const gap = 8;
+        const cardW = (rect.width - gap * (cols - 1)) / cols;
+        const cardH = (rect.height - gap * (rows - 1)) / rows;
+
+        const col = Math.floor(relX / (cardW + gap));
+        const row = Math.floor(relY / (cardH + gap));
+        if (col < 0 || col >= cols || row < 0 || row >= rows) return -1;
+        return row * cols + col;
+      }
+
+      // 处理指针按下
+      function handlePointerDown(e) {
         if (!gameActive || roundEnding) return;
-        if (cardState[index] === 'matched') return;
-        if (cardState[index] === 'flipped') return;
+        const idx = getCardIndexFromPoint(e.clientX, e.clientY);
+        if (idx === -1) return;
+        if (cardState[idx] === 'matched' || cardState[idx] === 'flipped') return;
+
+        isPointerDown = true;
+        pointerStartIndex = idx;
+        lastFlippedIndex = idx;
+        swipeDirection = null;
+        swipeMoved = false;
+
+        // 立即翻开起始卡片
+        flipCard(idx);
+        e.preventDefault();
+      }
+
+      // 处理指针移动
+      function handlePointerMove(e) {
+        if (!isPointerDown || !gameActive || roundEnding) return;
+        e.preventDefault();
+
+        const idx = getCardIndexFromPoint(e.clientX, e.clientY);
+        if (idx === -1 || idx === lastFlippedIndex) return;
+
+        // 确定方向
+        if (swipeDirection === null && pointerStartIndex !== -1) {
+          const cols = 4;
+          const startRow = Math.floor(pointerStartIndex / cols);
+          const startCol = pointerStartIndex % cols;
+          const currRow = Math.floor(idx / cols);
+          const currCol = idx % cols;
+          const dRow = currRow - startRow;
+          const dCol = currCol - startCol;
+
+          if (Math.abs(dRow) > Math.abs(dCol)) {
+            swipeDirection = dRow > 0 ? 'down' : 'up';
+          } else if (Math.abs(dCol) > Math.abs(dRow)) {
+            swipeDirection = dCol > 0 ? 'right' : 'left';
+          } else {
+            return; // 方向不明确
+          }
+        }
+
+        // 检查是否在滑动方向上连续
+        if (swipeDirection) {
+          const cols = 4;
+          const lastRow = Math.floor(lastFlippedIndex / cols);
+          const lastCol = lastFlippedIndex % cols;
+          const currRow = Math.floor(idx / cols);
+          const currCol = idx % cols;
+
+          let validStep = false;
+          if (swipeDirection === 'right' && currRow === lastRow && currCol === lastCol + 1) validStep = true;
+          if (swipeDirection === 'left' && currRow === lastRow && currCol === lastCol - 1) validStep = true;
+          if (swipeDirection === 'down' && currCol === lastCol && currRow === lastRow + 1) validStep = true;
+          if (swipeDirection === 'up' && currCol === lastCol && currRow === lastRow - 1) validStep = true;
+
+          if (validStep) {
+            // 检查目标卡片是否可翻
+            if (cardState[idx] === 'hidden') {
+              flipCard(idx);
+              lastFlippedIndex = idx;
+              swipeMoved = true;
+            }
+          }
+        }
+      }
+
+      // 处理指针释放
+      function handlePointerUp(e) {
+        isPointerDown = false;
+        pointerStartIndex = -1;
+        lastFlippedIndex = -1;
+        swipeDirection = null;
+        swipeMoved = false;
+      }
+
+      // 翻开一张卡片
+      function flipCard(index) {
+        if (cardState[index] !== 'hidden') return;
+        if (!gameActive || roundEnding) return;
 
         const card = cardElements[index];
         const num = boardCards[index];
@@ -796,15 +861,21 @@
           card.appendChild(pointsSpan);
         }
 
+        // 检查是否集齐三张
+        checkTriple(num);
+      }
+
+      // 检查是否集齐三张相同数字
+      function checkTriple(num) {
         const count = cardState.reduce((acc, state, i) => {
           if ((state === 'flipped' || state === 'matched') && boardCards[i] === num) return acc + 1;
           return acc;
         }, 0);
 
-        // 集齐三张，立即结算
         if (count >= 3) {
           roundEnding = true;
           gameActive = false;
+          isPointerDown = false;
 
           for (let i = 0; i < 20; i++) {
             if (boardCards[i] === num && (cardState[i] === 'flipped' || cardState[i] === 'matched')) {
@@ -825,7 +896,6 @@
 
           if (num >= 5 && num <= 7) {
             unlockPngSlot(selectedTier, num);
-            autoSave(); // 解锁新图案时自动存档
           }
 
           setTimeout(() => {
@@ -834,19 +904,34 @@
         }
       }
 
-      // 显示弹窗：显示翻出的三个相同数字/图案 和 对应积分
+      // 卡片点击处理（保留原有点击逻辑）
+      function onCardClick(index) {
+        if (!gameActive || roundEnding) return;
+        if (cardState[index] === 'matched') return;
+        if (cardState[index] === 'flipped') return;
+
+        // 如果已经通过滑动翻开了这张卡，就不再处理
+        if (cardState[index] !== 'hidden') return;
+
+        flipCard(index);
+      }
+
+      // 显示弹窗：显示三个相同数字/图案 和 对应积分
       function showGameOverModal(num, reward) {
         modalNumberDisplay.innerHTML = '';
-        if (num >= 5 && num <= 7) {
-          const img = document.createElement('img');
-          img.src = IMG_BASE + getImgFileName(selectedTier, num);
-          img.alt = String(num);
-          modalNumberDisplay.appendChild(img);
-        } else {
-          const span = document.createElement('span');
-          span.className = 'num-text';
-          span.textContent = num;
-          modalNumberDisplay.appendChild(span);
+        // 三个并排显示
+        for (let k = 0; k < 3; k++) {
+          if (num >= 5 && num <= 7) {
+            const img = document.createElement('img');
+            img.src = IMG_BASE + getImgFileName(selectedTier, num);
+            img.alt = String(num);
+            modalNumberDisplay.appendChild(img);
+          } else {
+            const span = document.createElement('span');
+            span.className = 'num-text';
+            span.textContent = num;
+            modalNumberDisplay.appendChild(span);
+          }
         }
 
         modalScoreValue.textContent = reward;
@@ -878,13 +963,11 @@
 
       // 按钮事件
       resetBtn.addEventListener('click', fullReset);
-      saveBtn.addEventListener('click', manualSave);
-      loadBtn.addEventListener('click', manualLoad);
+      hardResetBtn.addEventListener('click', hardReset);
       modalCloseBtn.addEventListener('click', closeModalAndReset);
 
       // 初始化
       initCollectionGrid();
-      initFromStorage();
       updateScoreUI();
     })();
   </script>
