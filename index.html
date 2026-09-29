@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>翻翻乐 · 莫兰迪扁平</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #d9d2cc;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 12px;
+      color: #4b4b4b;
+    }
+
+    .game-container {
+      width: 100%;
+      max-width: 400px;
+      background-color: #e7e2dc;
+      border-radius: 32px;
+      padding: 24px 18px 30px;
+      box-shadow: none;
+    }
+
+    /* 积分栏 */
+    .score-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #d6d2cb;
+      border-radius: 60px;
+      padding: 10px 22px;
+      margin-bottom: 22px;
+      border: 1px solid #ccc6be;
+      box-shadow: none;
+    }
+
+    .score-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .score-label {
+      font-size: 0.85rem;
+      font-weight: 400;
+      letter-spacing: 0.5px;
+      color: #6e6a64;
+    }
+
+    .high-score {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #b08d7a;
+    }
+
+    .high-score span {
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    .score-value {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1.8rem;
+      font-weight: 500;
+      color: #6b8c7c;
+      transition: transform 0.2s ease;
+    }
+
+    .score-value span {
+      font-size: 1.9rem;
+      line-height: 1;
+    }
+
+    /* 档位选择区 */
+    .tier-section {
+      margin-bottom: 20px;
+      transition: opacity 0.3s;
+    }
+
+    .tier-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    /* 档位按钮 */
+    .tier-btn {
+      background: #f3efea;
+      border: 1px solid #d2cac1;
+      border-radius: 26px;
+      padding: 14px 0;
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: #5a5a5a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.15s;
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .tier-btn:active {
+      transform: scale(0.96);
+      background-color: #e6dfd7;
+    }
+
+    .tier-btn.selected {
+      background-color: #c7d3cc;
+      border-color: #a8b9b0;
+      color: #2f4b3e;
+      box-shadow: none;
+    }
+
+    .tier-btn .emoji {
+      font-size: 1.3rem;
+    }
+
+    /* 游戏区域 */
+    .board-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    /* 卡片 */
+    .card {
+      aspect-ratio: 1 / 1;
+      background-color: #cfc9c0;
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      color: #fff5e6;
+      border: 1px solid #bfb8af;
+      transition: background-color 0.15s ease, border-color 0.15s ease;
+      cursor: pointer;
+      user-select: none;
+      box-shadow: none;
+      background-image: none;
+      padding: 4px;
+      line-height: 1;
+      overflow: hidden;
+    }
+
+    .card.flipped {
+      background-color: #b7c9be;
+      border: 1px solid #9db3a6;
+      color: #3e4e46;
+      box-shadow: none;
+      background-image: none;
+    }
+
+    .card.matched {
+      background-color: #cfd9d1;
+      color: #7f8f84;
+      border: 1px solid #bcc9c0;
+      opacity: 0.8;
+      pointer-events: none;
+      box-shadow: none;
+    }
+
+    .card .number {
+      font-size: 1.7rem;
+      font-weight: 600;
+      line-height: 1.1;
+    }
+
+    .card .points {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #587067;
+      opacity: 0.9;
+      line-height: 1;
+      margin-top: 2px;
+      letter-spacing: 0.2px;
+    }
+
+    .card.matched .points {
+      color: #7f8f84;
+      opacity: 0.7;
+    }
+
+    /* 卡片内的图片（数字5~7） */
+    .card .card-img {
+      width: 70%;
+      height: 70%;
+      object-fit: contain;
+      display: block;
+    }
+
+    /* 图片下方的积分文字 */
+    .card .img-points {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #587067;
+      opacity: 0.9;
+      line-height: 1;
+      margin-top: 1px;
+      letter-spacing: 0.2px;
+    }
+
+    .card.matched .img-points {
+      color: #7f8f84;
+      opacity: 0.7;
+    }
+
+    /* 游戏结束信息 */
+    .game-over-message {
+      text-align: center;
+      font-size: 1rem;
+      color: #9d8e82;
+      padding: 10px 0 4px;
+      letter-spacing: 0.5px;
+      min-height: 40px;
+    }
+
+    /* 重置按钮 */
+    .reset-area {
+      display: flex;
+      justify-content: center;
+      margin-top: 12px;
+    }
+
+    .reset-btn {
+      background: #d6d2cb;
+      border: 1px solid #c2bbb3;
+      border-radius: 40px;
+      padding: 12px 32px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #5f5a55;
+      transition: all 0.15s;
+      cursor: pointer;
+      letter-spacing: 1px;
+      box-shadow: none;
+    }
+
+    .reset-btn:active {
+      background: #cbc4bc;
+      transform: scale(0.97);
+    }
+
+    /* 收集栏（12个png显示位） - 仅在开始界面显示 */
+    .collection-section {
+      margin-top: 18px;
+      padding: 0 4px;
+    }
+
+    .collection-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .collection-slot {
+      aspect-ratio: 1 / 1;
+      background-color: #ddd8d2;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px dashed #c2bbb3;
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .collection-slot img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: none;
+    }
+
+    .collection-slot.unlocked img {
+      display: block;
+    }
+
+    .collection-slot .slot-label {
+      font-size: 0.55rem;
+      color: #b1a69b;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .collection-slot.unlocked .slot-label {
+      display: none;
+    }
+
+    /* 隐藏类 */
+    .hidden {
+      display: none !important;
+    }
+
+    /* 游戏结束弹窗 */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(80, 75, 70, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-overlay.hidden {
+      display: none !important;
+    }
+
+    .modal-box {
+      background-color: #e7e2dc;
+      border-radius: 28px;
+      padding: 28px 24px 24px;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      border: 1px solid #d2cac1;
+      box-shadow: none;
+    }
+
+    /* 弹窗内容：显示对应积分 */
+    .modal-reward {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .modal-reward-label {
+      font-size: 0.85rem;
+      color: #9a928a;
+      letter-spacing: 0.5px;
+    }
+
+    .modal-reward-value {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 2rem;
+      font-weight: 600;
+      color: #6b8c7c;
+    }
+
+    .modal-reward-value span {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    /* 弹窗内数字/图案展示 */
+    .modal-number-display {
+      margin-bottom: 16px;
+    }
+
+    .modal-number-display .num-text {
+      font-size: 2.4rem;
+      font-weight: 600;
+      color: #3e4e46;
+    }
+
+    .modal-number-display img {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      background-color: #ddd8d2;
+      border-radius: 12px;
+      padding: 6px;
+    }
+
+    .modal-pngs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 20px;
+      min-height: 10px;
+    }
+
+    .modal-pngs img {
+      width: 52px;
+      height: 52px;
+      object-fit: contain;
+      background-color: #ddd8d2;
+      border-radius: 10px;
+      padding: 4px;
+    }
+
+    .modal-btn {
+      background: #c7d3cc;
+      border: 1px solid #a8b9b0;
+      border-radius: 40px;
+      padding: 12px 32px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #2f4b3e;
+      transition: all 0.15s;
+      cursor: pointer;
+      letter-spacing: 1px;
+      width: 100%;
+      box-shadow: none;
+    }
+
+    .modal-btn:active {
+      background: #b7c9be;
+      transform: scale(0.97);
+    }
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <!-- 积分栏 -->
+    <div class="score-bar">
+      <div class="score-left">
+        <span class="score-label">历史最高</span>
+        <div class="high-score">
+          <span>🌱</span>
+          <span id="highScoreDisplay">20</span>
+        </div>
+      </div>
+      <div class="score-value">
+        <span>🌱</span>
+        <span id="scoreDisplay">20</span>
+      </div>
+    </div>
+
+    <!-- 档位选择 -->
+    <div id="tierSection" class="tier-section">
+      <div class="tier-buttons">
+        <button class="tier-btn" data-tier="1">
+          <span class="emoji">🌱</span>-1
+        </button>
+        <button class="tier-btn" data-tier="5">
+          <span class="emoji">🌱</span>-5
+        </button>
+        <button class="tier-btn" data-tier="10">
+          <span class="emoji">🌱</span>-10
+        </button>
+        <button class="tier-btn" data-tier="25">
+          <span class="emoji">🌱</span>-25
+        </button>
+      </div>
+    </div>
+
+    <!-- 游戏棋盘 -->
+    <div id="boardSection" class="board-section hidden">
+      <div id="board" class="board"></div>
+      <div id="gameOverMsg" class="game-over-message"></div>
+    </div>
+
+    <!-- 重置按钮 -->
+    <div class="reset-area">
+      <button id="resetBtn" class="reset-btn">重新开始</button>
+    </div>
+
+    <!-- 收集栏：12个png显示位（仅在开始界面显示） -->
+    <div id="collectionSection" class="collection-section">
+      <div class="collection-grid" id="collectionGrid"></div>
+    </div>
+  </div>
+
+  <!-- 游戏结束弹窗 -->
+  <div id="gameOverModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <!-- 显示翻出的三个相同数字/图案 -->
+      <div class="modal-number-display" id="modalNumberDisplay"></div>
+      <!-- 显示对应积分 -->
+      <div class="modal-reward">
+        <div class="modal-reward-label">获得积分</div>
+        <div class="modal-reward-value">
+          <span>🌱</span>
+          <span id="modalScoreValue">0</span>
+        </div>
+      </div>
+      <!-- 如有解锁图案则显示 -->
+      <div class="modal-pngs" id="modalPngs"></div>
+      <button class="modal-btn" id="modalCloseBtn">确定</button>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- 积分映射表 ----------
+      const REWARD_MAP = {
+        1:  { 1: 0, 2: 0, 3: 1, 4: 2, 5: 4, 6: 8, 7: 25 },
+        5:  { 1: 0, 2: 0, 3: 2, 4: 5, 5: 10, 6: 20, 7: 125 },
+        10: { 1: 0, 2: 0, 3: 5, 4: 10, 5: 20, 6: 40, 7: 250 },
+        25: { 1: 0, 2: 0, 3: 12, 4: 25, 5: 50, 6: 100, 7: 625 }
+      };
+
+      // 数字出现概率权重
+      const WEIGHTS = [20, 20, 20, 15, 15, 5, 5];
+      const WEIGHT_TOTAL = WEIGHTS.reduce((a, b) => a + b, 0);
+
+      // 图片基础路径
+      const IMG_BASE = 'https://raw.githubusercontent.com/12412175/gameTicket/main/images/';
+
+      // 档位列表和数字5~7
+      const TIERS = [1, 5, 10, 25];
+      const HIGH_NUMS = [5, 6, 7];
+
+      // 生成图片文件名
+      function getImgFileName(tier, num) {
+        return `${tier}-${num}.png`;
+      }
+
+      // 状态变量
+      let currentScore = 20;
+      let highScore = 20;
+      let selectedTier = null;
+      let boardCards = [];
+      let cardElements = [];
+      let cardState = [];
+      let gameActive = false;
+      let roundEnding = false;
+      let roundUnlockedPngs = [];
+
+      // DOM 元素
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const highScoreDisplay = document.getElementById('highScoreDisplay');
+      const tierSection = document.getElementById('tierSection');
+      const boardSection = document.getElementById('boardSection');
+      const boardEl = document.getElementById('board');
+      const gameOverMsg = document.getElementById('gameOverMsg');
+      const resetBtn = document.getElementById('resetBtn');
+      const tierButtons = document.querySelectorAll('.tier-btn');
+      const collectionSection = document.getElementById('collectionSection');
+      const collectionGrid = document.getElementById('collectionGrid');
+      const gameOverModal = document.getElementById('gameOverModal');
+      const modalNumberDisplay = document.getElementById('modalNumberDisplay');
+      const modalScoreValue = document.getElementById('modalScoreValue');
+      const modalPngs = document.getElementById('modalPngs');
+      const modalCloseBtn = document.getElementById('modalCloseBtn');
+
+      // 初始化收集栏
+      function initCollectionGrid() {
+        collectionGrid.innerHTML = '';
+        TIERS.forEach(tier => {
+          HIGH_NUMS.forEach(num => {
+            const slot = document.createElement('div');
+            slot.className = 'collection-slot';
+            slot.dataset.tier = tier;
+            slot.dataset.num = num;
+            const img = document.createElement('img');
+            img.src = IMG_BASE + getImgFileName(tier, num);
+            img.alt = `${tier}档位 ${num}`;
+            const label = document.createElement('span');
+            label.className = 'slot-label';
+            label.textContent = `${tier}·${num}`;
+            slot.appendChild(img);
+            slot.appendChild(label);
+            collectionGrid.appendChild(slot);
+          });
+        });
+      }
+
+      // 解锁png槽位
+      function unlockPngSlot(tier, num) {
+        const slot = collectionGrid.querySelector(`.collection-slot[data-tier="${tier}"][data-num="${num}"]`);
+        if (slot) {
+          slot.classList.add('unlocked');
+        }
+        const key = `${tier}-${num}`;
+        if (!roundUnlockedPngs.some(p => p.key === key)) {
+          roundUnlockedPngs.push({ key, tier, num });
+        }
+      }
+
+      // 更新积分UI
+      function updateScoreUI() {
+        scoreDisplay.textContent = currentScore;
+        if (currentScore > highScore) {
+          highScore = currentScore;
+        }
+        highScoreDisplay.textContent = highScore;
+      }
+
+      function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      function weightedRandomNumber() {
+        let r = Math.random() * WEIGHT_TOTAL;
+        let cumulative = 0;
+        for (let i = 0; i < WEIGHTS.length; i++) {
+          cumulative += WEIGHTS[i];
+          if (r < cumulative) return i + 1;
+        }
+        return 7;
+      }
+
+      function generateDeck() {
+        const deck = [];
+        for (let i = 0; i < 20; i++) {
+          deck.push(weightedRandomNumber());
+        }
+        const countMap = {};
+        deck.forEach(num => { countMap[num] = (countMap[num] || 0) + 1; });
+        const hasTriple = Object.values(countMap).some(c => c >= 3);
+        if (!hasTriple) {
+          const forcedNum = weightedRandomNumber();
+          deck[0] = forcedNum;
+          deck[1] = forcedNum;
+          deck[2] = forcedNum;
+        }
+        return shuffleArray(deck);
+      }
+
+      // 重置到开始界面
+      function resetToStart() {
+        updateScoreUI();
+        selectedTier = null;
+        tierButtons.forEach(btn => btn.classList.remove('selected'));
+        boardSection.classList.add('hidden');
+        tierSection.classList.remove('hidden');
+        collectionSection.classList.remove('hidden');
+        gameOverMsg.textContent = '';
+        boardEl.innerHTML = '';
+        cardElements = [];
+        cardState = [];
+        boardCards = [];
+        gameActive = false;
+        roundEnding = false;
+        roundUnlockedPngs = [];
+      }
+
+      // 完全重置
+      function fullReset() {
+        currentScore = 20;
+        highScore = 20;
+        updateScoreUI();
+        selectedTier = null;
+        tierButtons.forEach(btn => btn.classList.remove('selected'));
+        boardSection.classList.add('hidden');
+        tierSection.classList.remove('hidden');
+        collectionSection.classList.remove('hidden');
+        gameOverMsg.textContent = '';
+        boardEl.innerHTML = '';
+        cardElements = [];
+        cardState = [];
+        boardCards = [];
+        gameActive = false;
+        roundEnding = false;
+        roundUnlockedPngs = [];
+        document.querySelectorAll('.collection-slot').forEach(slot => {
+          slot.classList.remove('unlocked');
+        });
+      }
+
+      // 开始游戏
+      function startGame(tier) {
+        if (currentScore < tier) {
+          alert('积分不足');
+          return;
+        }
+        currentScore -= tier;
+        updateScoreUI();
+
+        selectedTier = tier;
+        boardCards = generateDeck();
+        cardState = new Array(20).fill('hidden');
+        gameActive = true;
+        roundEnding = false;
+        roundUnlockedPngs = [];
+
+        renderBoard();
+        tierSection.classList.add('hidden');
+        boardSection.classList.remove('hidden');
+        collectionSection.classList.add('hidden');
+        gameOverMsg.textContent = '';
+      }
+
+      // 渲染卡片
+      function renderBoard() {
+        boardEl.innerHTML = '';
+        cardElements = [];
+        for (let i = 0; i < 20; i++) {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.dataset.index = i;
+          card.addEventListener('click', () => onCardClick(i));
+          boardEl.appendChild(card);
+          cardElements.push(card);
+        }
+      }
+
+      // 卡片点击处理
+      function onCardClick(index) {
+        if (!gameActive || roundEnding) return;
+        if (cardState[index] === 'matched') return;
+        if (cardState[index] === 'flipped') return;
+
+        const card = cardElements[index];
+        const num = boardCards[index];
+        const points = REWARD_MAP[selectedTier]?.[num] ?? 0;
+
+        card.innerHTML = '';
+        card.classList.add('flipped');
+        cardState[index] = 'flipped';
+
+        if (num >= 5 && num <= 7) {
+          const img = document.createElement('img');
+          img.className = 'card-img';
+          img.src = IMG_BASE + getImgFileName(selectedTier, num);
+          img.alt = String(num);
+          card.appendChild(img);
+          const pointsSpan = document.createElement('span');
+          pointsSpan.className = 'img-points';
+          pointsSpan.textContent = `+${points}🌱`;
+          card.appendChild(pointsSpan);
+        } else {
+          const numSpan = document.createElement('span');
+          numSpan.className = 'number';
+          numSpan.textContent = num;
+          card.appendChild(numSpan);
+          const pointsSpan = document.createElement('span');
+          pointsSpan.className = 'points';
+          pointsSpan.textContent = `+${points}🌱`;
+          card.appendChild(pointsSpan);
+        }
+
+        const count = cardState.reduce((acc, state, i) => {
+          if ((state === 'flipped' || state === 'matched') && boardCards[i] === num) return acc + 1;
+          return acc;
+        }, 0);
+
+        // 集齐三张，立即结算
+        if (count >= 3) {
+          roundEnding = true;
+          gameActive = false;
+
+          for (let i = 0; i < 20; i++) {
+            if (boardCards[i] === num && (cardState[i] === 'flipped' || cardState[i] === 'matched')) {
+              cardState[i] = 'matched';
+              cardElements[i].classList.add('matched');
+            }
+          }
+
+          const reward = REWARD_MAP[selectedTier]?.[num] ?? 0;
+          if (reward > 0) {
+            currentScore += reward;
+            updateScoreUI();
+            scoreDisplay.parentElement.style.transform = 'scale(1.15)';
+            setTimeout(() => {
+              scoreDisplay.parentElement.style.transform = 'scale(1)';
+            }, 200);
+          }
+
+          if (num >= 5 && num <= 7) {
+            unlockPngSlot(selectedTier, num);
+          }
+
+          // 弹出弹窗，显示翻出的数字/图案和对应积分
+          setTimeout(() => {
+            showGameOverModal(num, reward);
+          }, 600);
+        }
+      }
+
+      // 显示弹窗：显示翻出的三个相同数字/图案 和 对应积分
+      function showGameOverModal(num, reward) {
+        // 显示数字/图案
+        modalNumberDisplay.innerHTML = '';
+        if (num >= 5 && num <= 7) {
+          const img = document.createElement('img');
+          img.src = IMG_BASE + getImgFileName(selectedTier, num);
+          img.alt = String(num);
+          modalNumberDisplay.appendChild(img);
+        } else {
+          const span = document.createElement('span');
+          span.className = 'num-text';
+          span.textContent = num;
+          modalNumberDisplay.appendChild(span);
+        }
+
+        // 显示对应积分
+        modalScoreValue.textContent = reward;
+
+        // 显示本轮解锁的png（如果有）
+        modalPngs.innerHTML = '';
+        if (roundUnlockedPngs.length > 0) {
+          roundUnlockedPngs.forEach(p => {
+            const img = document.createElement('img');
+            img.src = IMG_BASE + getImgFileName(p.tier, p.num);
+            img.alt = `${p.tier}-${p.num}`;
+            modalPngs.appendChild(img);
+          });
+        }
+
+        gameOverModal.classList.remove('hidden');
+      }
+
+      // 关闭弹窗并回到开始界面
+      function closeModalAndReset() {
+        gameOverModal.classList.add('hidden');
+        resetToStart();
+      }
+
+      // 档位按钮事件
+      tierButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tier = parseInt(btn.dataset.tier, 10);
+          if (currentScore < tier) {
+            btn.style.transform = 'scale(0.95)';
+            setTimeout(() => btn.style.transform = '', 150);
+            return;
+          }
+          if (!tierSection.classList.contains('hidden')) {
+            tierButtons.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            startGame(tier);
+          }
+        });
+      });
+
+      // 重置按钮
+      resetBtn.addEventListener('click', fullReset);
+
+      // 弹窗确定按钮
+      modalCloseBtn.addEventListener('click', closeModalAndReset);
+
+      // 初始化
+      initCollectionGrid();
+      updateScoreUI();
+    })();
+  </script>
+</body>
+</html>
