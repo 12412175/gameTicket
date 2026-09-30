@@ -572,7 +572,7 @@
         <button class="tier-btn" data-tier="5">-5<span class="emoji">🌱</span></button>
         <button class="tier-btn" data-tier="10">-10<span class="emoji">🌱</span></button>
         <button class="tier-btn" data-tier="25">-25<span class="emoji">🌱</span></button>
-        <button class="egg-btn" id="eggBtn">-1<span class="emoji">🌱</span>（彩蛋）</button>
+        <button class="egg-btn" id="eggBtn">-100<span class="emoji">🌱</span>（彩蛋）</button>
       </div>
     </div>
 
@@ -1036,11 +1036,11 @@
       // ===================== 彩蛋游戏逻辑 =====================
 
       function startEggGame() {
-        if (currentScore < 1) {
+        if (currentScore < 100) {
           alert('积分不足');
           return;
         }
-        currentScore -= 1;
+        currentScore -= 100;
         updateScoreUI();
 
         eggRowsData = [3, 4, 7];
@@ -1216,7 +1216,7 @@
       });
 
       eggBtn.addEventListener('click', () => {
-        if (currentScore < 1) {
+        if (currentScore < 100) {
           eggBtn.style.transform = 'scale(0.95)';
           setTimeout(() => eggBtn.style.transform = '', 150);
           return;
