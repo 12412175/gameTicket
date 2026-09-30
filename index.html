@@ -134,6 +134,31 @@
       font-size: 1.3rem;
     }
 
+    /* 彩蛋按钮 */
+    .egg-btn {
+      grid-column: 1 / -1;
+      background: #e8ddd6;
+      border: 1px solid #d2c1b8;
+      border-radius: 26px;
+      padding: 14px 0;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #8a7a70;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      transition: all 0.15s;
+      cursor: pointer;
+      box-shadow: none;
+      margin-top: 4px;
+    }
+
+    .egg-btn:active {
+      transform: scale(0.96);
+      background-color: #dfd2ca;
+    }
+
     /* 游戏区域 */
     .board-section {
       display: flex;
@@ -242,33 +267,14 @@
       min-height: 40px;
     }
 
-    /* 按钮区域 */
-    .button-area {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 12px;
-    }
-
-    .action-btn {
-      background: #d6d2cb;
-      border: 1px solid #c2bbb3;
-      border-radius: 40px;
-      padding: 10px 20px;
+    /* 提示文字 */
+    .hint-text {
+      text-align: center;
       font-size: 0.9rem;
-      font-weight: 500;
-      color: #5f5a55;
-      transition: all 0.15s;
-      cursor: pointer;
+      color: #9d8e82;
+      padding: 12px 0 4px;
       letter-spacing: 0.5px;
-      box-shadow: none;
-      flex: 1;
-      max-width: 130px;
-    }
-
-    .action-btn:active {
-      background: #cbc4bc;
-      transform: scale(0.97);
+      line-height: 1.5;
     }
 
     /* 收集栏 - 仅在开始界面显示，无文字 */
@@ -401,6 +407,99 @@
       background: #b7c9be;
       transform: scale(0.97);
     }
+
+    /* ===== 彩蛋游戏界面 ===== */
+    .egg-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .egg-top-img {
+      width: 100px;
+      height: 100px;
+      object-fit: contain;
+      margin-bottom: 20px;
+      background-color: #ddd8d2;
+      border-radius: 16px;
+      padding: 8px;
+    }
+
+    .egg-rows {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 24px;
+      width: 100%;
+    }
+
+    .egg-row {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .egg-heart {
+      font-size: 2.2rem;
+      line-height: 1;
+      cursor: pointer;
+      transition: transform 0.15s, opacity 0.15s;
+      user-select: none;
+      display: inline-block;
+      padding: 2px;
+      border-radius: 8px;
+    }
+
+    .egg-heart:active {
+      transform: scale(0.85);
+    }
+
+    .egg-heart.taken {
+      opacity: 0.15;
+      pointer-events: none;
+      transform: scale(0.7);
+    }
+
+    .egg-heart.disabled {
+      pointer-events: none;
+    }
+
+    .egg-bottom-text {
+      text-align: center;
+      font-size: 0.9rem;
+      color: #9d8e82;
+      letter-spacing: 0.5px;
+      line-height: 1.5;
+      padding: 0 8px;
+    }
+
+    /* 彩蛋弹窗 */
+    .egg-modal-text {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #6b5a50;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    .egg-modal-reward {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 2rem;
+      font-weight: 600;
+      color: #6b8c7c;
+      margin-bottom: 20px;
+    }
+
+    .egg-modal-reward span {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
   </style>
 </head>
 <body>
@@ -427,23 +526,26 @@
         <button class="tier-btn" data-tier="5">-5<span class="emoji">🌱</span></button>
         <button class="tier-btn" data-tier="10">-10<span class="emoji">🌱</span></button>
         <button class="tier-btn" data-tier="25">-25<span class="emoji">🌱</span></button>
+        <button class="egg-btn" id="eggBtn">-1<span class="emoji">🌱</span>（彩蛋）</button>
       </div>
     </div>
 
     <!-- 游戏棋盘 -->
     <div id="boardSection" class="board-section hidden">
       <div id="board" class="board"></div>
-      <div id="gameOverMsg" class="game-over-message"></div>
+      <div class="hint-text">翻出三个相同图案即可赢取对应🌱</div>
+    </div>
+
+    <!-- 彩蛋游戏界面 -->
+    <div id="eggSection" class="egg-section hidden">
+      <img class="egg-top-img" id="eggTopImg" src="" alt="彩蛋图案">
+      <div class="egg-rows" id="eggRows"></div>
+      <div class="egg-bottom-text">拿到最后一枚🖤即可赢取瞎子的肚兜</div>
     </div>
 
     <!-- 收集栏：12个png显示位（仅在开始界面显示，无文字） -->
     <div id="collectionSection" class="collection-section">
       <div class="collection-grid" id="collectionGrid"></div>
-    </div>
-
-    <!-- 按钮区域：重开 -->
-    <div class="button-area">
-      <button id="hardResetBtn" class="action-btn">重开</button>
     </div>
   </div>
 
@@ -458,6 +560,18 @@
         <span id="modalScoreValue">0</span>
       </div>
       <button class="modal-btn" id="modalCloseBtn">确定</button>
+    </div>
+  </div>
+
+  <!-- 彩蛋弹窗 -->
+  <div id="eggModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="egg-modal-text">天哪，那是接近的</div>
+      <div class="egg-modal-reward">
+        <span>🌱</span>
+        <span>0</span>
+      </div>
+      <button class="modal-btn" id="eggModalCloseBtn">确定</button>
     </div>
   </div>
 
@@ -513,13 +627,21 @@
       let swipeDirection = null;
       let swipeMoved = false;
 
+      // 彩蛋游戏状态
+      let eggRowsData = [3, 4, 7]; // 三行 🖤 的数量
+      let eggGameActive = false;
+      let eggPlayerTurn = true;    // 玩家先手
+      let eggThinking = false;     // 防止系统连点
+
       // DOM 元素
       const scoreDisplay = document.getElementById('scoreDisplay');
       const highScoreDisplay = document.getElementById('highScoreDisplay');
       const tierSection = document.getElementById('tierSection');
       const boardSection = document.getElementById('boardSection');
       const boardEl = document.getElementById('board');
-      const gameOverMsg = document.getElementById('gameOverMsg');
+      const eggSection = document.getElementById('eggSection');
+      const eggTopImg = document.getElementById('eggTopImg');
+      const eggRowsEl = document.getElementById('eggRows');
       const hardResetBtn = document.getElementById('hardResetBtn');
       const tierButtons = document.querySelectorAll('.tier-btn');
       const collectionSection = document.getElementById('collectionSection');
@@ -528,6 +650,9 @@
       const modalNumberDisplay = document.getElementById('modalNumberDisplay');
       const modalScoreValue = document.getElementById('modalScoreValue');
       const modalCloseBtn = document.getElementById('modalCloseBtn');
+      const eggBtn = document.getElementById('eggBtn');
+      const eggModal = document.getElementById('eggModal');
+      const eggModalCloseBtn = document.getElementById('eggModalCloseBtn');
 
       // 初始化收集栏（无文字，只显示图片）
       function initCollectionGrid() {
@@ -605,9 +730,9 @@
         selectedTier = null;
         tierButtons.forEach(btn => btn.classList.remove('selected'));
         boardSection.classList.add('hidden');
+        eggSection.classList.add('hidden');
         tierSection.classList.remove('hidden');
         collectionSection.classList.remove('hidden');
-        gameOverMsg.textContent = '';
         boardEl.innerHTML = '';
         cardElements = [];
         cardState = [];
@@ -619,6 +744,9 @@
         lastFlippedIndex = -1;
         swipeDirection = null;
         swipeMoved = false;
+        eggGameActive = false;
+        eggPlayerTurn = true;
+        eggThinking = false;
       }
 
       // 重开：重置所有状态到初始（历史最高和收集栏位清零）
@@ -629,9 +757,9 @@
         selectedTier = null;
         tierButtons.forEach(btn => btn.classList.remove('selected'));
         boardSection.classList.add('hidden');
+        eggSection.classList.add('hidden');
         tierSection.classList.remove('hidden');
         collectionSection.classList.remove('hidden');
-        gameOverMsg.textContent = '';
         boardEl.innerHTML = '';
         cardElements = [];
         cardState = [];
@@ -643,7 +771,9 @@
         lastFlippedIndex = -1;
         swipeDirection = null;
         swipeMoved = false;
-        // 清除所有解锁状态
+        eggGameActive = false;
+        eggPlayerTurn = true;
+        eggThinking = false;
         document.querySelectorAll('.collection-slot').forEach(slot => {
           slot.classList.remove('unlocked');
         });
@@ -666,11 +796,10 @@
 
         renderBoard();
         tierSection.classList.add('hidden');
+        eggSection.classList.add('hidden');
         boardSection.classList.remove('hidden');
         collectionSection.classList.add('hidden');
-        gameOverMsg.textContent = '';
 
-        // 重置滑动状态
         isPointerDown = false;
         pointerStartIndex = -1;
         lastFlippedIndex = -1;
@@ -690,7 +819,6 @@
           boardEl.appendChild(card);
           cardElements.push(card);
         }
-        // 绑定滑动事件
         bindSwipeEvents();
       }
 
@@ -700,56 +828,45 @@
         boardEl.addEventListener('pointermove', handlePointerMove);
         boardEl.addEventListener('pointerup', handlePointerUp);
         boardEl.addEventListener('pointercancel', handlePointerUp);
-        // 防止触摸时滚动
         boardEl.addEventListener('touchstart', (e) => { e.preventDefault(); }, { passive: false });
       }
 
-      // 根据坐标获取卡片索引
       function getCardIndexFromPoint(x, y) {
         const rect = boardEl.getBoundingClientRect();
         const relX = x - rect.left;
         const relY = y - rect.top;
         if (relX < 0 || relY < 0 || relX > rect.width || relY > rect.height) return -1;
-
         const cols = 4;
         const rows = 5;
         const gap = 8;
         const cardW = (rect.width - gap * (cols - 1)) / cols;
         const cardH = (rect.height - gap * (rows - 1)) / rows;
-
         const col = Math.floor(relX / (cardW + gap));
         const row = Math.floor(relY / (cardH + gap));
         if (col < 0 || col >= cols || row < 0 || row >= rows) return -1;
         return row * cols + col;
       }
 
-      // 处理指针按下
       function handlePointerDown(e) {
         if (!gameActive || roundEnding) return;
         const idx = getCardIndexFromPoint(e.clientX, e.clientY);
         if (idx === -1) return;
         if (cardState[idx] === 'matched' || cardState[idx] === 'flipped') return;
-
         isPointerDown = true;
         pointerStartIndex = idx;
         lastFlippedIndex = idx;
         swipeDirection = null;
         swipeMoved = false;
-
-        // 立即翻开起始卡片
         flipCard(idx);
         e.preventDefault();
       }
 
-      // 处理指针移动
       function handlePointerMove(e) {
         if (!isPointerDown || !gameActive || roundEnding) return;
         e.preventDefault();
-
         const idx = getCardIndexFromPoint(e.clientX, e.clientY);
         if (idx === -1 || idx === lastFlippedIndex) return;
 
-        // 确定方向
         if (swipeDirection === null && pointerStartIndex !== -1) {
           const cols = 4;
           const startRow = Math.floor(pointerStartIndex / cols);
@@ -758,43 +875,35 @@
           const currCol = idx % cols;
           const dRow = currRow - startRow;
           const dCol = currCol - startCol;
-
           if (Math.abs(dRow) > Math.abs(dCol)) {
             swipeDirection = dRow > 0 ? 'down' : 'up';
           } else if (Math.abs(dCol) > Math.abs(dRow)) {
             swipeDirection = dCol > 0 ? 'right' : 'left';
           } else {
-            return; // 方向不明确
+            return;
           }
         }
 
-        // 检查是否在滑动方向上连续
         if (swipeDirection) {
           const cols = 4;
           const lastRow = Math.floor(lastFlippedIndex / cols);
           const lastCol = lastFlippedIndex % cols;
           const currRow = Math.floor(idx / cols);
           const currCol = idx % cols;
-
           let validStep = false;
           if (swipeDirection === 'right' && currRow === lastRow && currCol === lastCol + 1) validStep = true;
           if (swipeDirection === 'left' && currRow === lastRow && currCol === lastCol - 1) validStep = true;
           if (swipeDirection === 'down' && currCol === lastCol && currRow === lastRow + 1) validStep = true;
           if (swipeDirection === 'up' && currCol === lastCol && currRow === lastRow - 1) validStep = true;
-
-          if (validStep) {
-            // 检查目标卡片是否可翻
-            if (cardState[idx] === 'hidden') {
-              flipCard(idx);
-              lastFlippedIndex = idx;
-              swipeMoved = true;
-            }
+          if (validStep && cardState[idx] === 'hidden') {
+            flipCard(idx);
+            lastFlippedIndex = idx;
+            swipeMoved = true;
           }
         }
       }
 
-      // 处理指针释放
-      function handlePointerUp(e) {
+      function handlePointerUp() {
         isPointerDown = false;
         pointerStartIndex = -1;
         lastFlippedIndex = -1;
@@ -836,7 +945,6 @@
           card.appendChild(pointsSpan);
         }
 
-        // 检查是否集齐三张
         checkTriple(num);
       }
 
@@ -879,17 +987,15 @@
         }
       }
 
-      // 卡片点击处理
       function onCardClick(index) {
         if (!gameActive || roundEnding) return;
         if (cardState[index] === 'matched') return;
         if (cardState[index] === 'flipped') return;
         if (cardState[index] !== 'hidden') return;
-
         flipCard(index);
       }
 
-      // 显示弹窗：显示三个相同数字/图案 和 对应积分
+      // 显示弹窗
       function showGameOverModal(num, reward) {
         modalNumberDisplay.innerHTML = '';
         for (let k = 0; k < 3; k++) {
@@ -905,16 +1011,149 @@
             modalNumberDisplay.appendChild(span);
           }
         }
-
         modalScoreValue.textContent = reward;
         gameOverModal.classList.remove('hidden');
       }
 
-      // 关闭弹窗并回到开始界面
+      // 关闭翻牌弹窗回到开始界面
       function closeModalAndReset() {
         gameOverModal.classList.add('hidden');
         resetToStart();
       }
+
+      // ===================== 彩蛋游戏逻辑 =====================
+
+      // 开始彩蛋游戏
+      function startEggGame() {
+        if (currentScore < 1) {
+          alert('积分不足');
+          return;
+        }
+        currentScore -= 1;
+        updateScoreUI();
+
+        eggRowsData = [3, 4, 7];
+        eggGameActive = true;
+        eggPlayerTurn = true;
+        eggThinking = false;
+
+        tierSection.classList.add('hidden');
+        collectionSection.classList.add('hidden');
+        boardSection.classList.add('hidden');
+        eggSection.classList.remove('hidden');
+
+        eggTopImg.src = IMG_BASE + '25-5.png';
+        eggTopImg.alt = '彩蛋图案';
+
+        renderEggRows();
+      }
+
+      // 渲染彩蛋行
+      function renderEggRows() {
+        eggRowsEl.innerHTML = '';
+        eggRowsData.forEach((count, rowIdx) => {
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'egg-row';
+          rowDiv.dataset.row = rowIdx;
+          for (let i = 0; i < count; i++) {
+            const heart = document.createElement('span');
+            heart.className = 'egg-heart';
+            heart.textContent = '🖤';
+            heart.dataset.row = rowIdx;
+            heart.dataset.idx = i;
+            heart.addEventListener('click', () => onEggHeartClick(rowIdx, i));
+            rowDiv.appendChild(heart);
+          }
+          eggRowsEl.appendChild(rowDiv);
+        });
+      }
+
+      // 玩家点击 🖤
+      function onEggHeartClick(rowIdx, heartIdx) {
+        if (!eggGameActive || !eggPlayerTurn || eggThinking) return;
+        if (eggRowsData[rowIdx] <= 0) return;
+
+        // 玩家从该行拿走从 heartIdx 开始到该行末尾的所有🖤（简化：点哪个就拿走该行从该位置到最后的所有🖤）
+        // 但规则是"每次只能从同一行中拿，数量不限，但至少要取一枚"
+        // 更自然的交互：点击某行的某个🖤，表示从该行拿走这一枚及之后的所有🖤
+        // 为了简化并符合"数量不限"的规则，我们让玩家点击该行任意一个🖤，拿走从该位置到该行末尾的所有🖤
+        // 这样玩家可以通过点击不同的位置来选择拿几枚
+
+        const takeCount = eggRowsData[rowIdx] - heartIdx;
+        if (takeCount <= 0) return;
+
+        // 执行玩家拿取
+        eggRowsData[rowIdx] -= takeCount;
+        renderEggRows();
+
+        // 检查游戏是否结束
+        if (checkEggGameOver()) return;
+
+        // 切换为系统回合
+        eggPlayerTurn = false;
+        eggThinking = true;
+        setTimeout(() => {
+          systemEggMove();
+        }, 400);
+      }
+
+      // 系统后手必胜策略（Nim 游戏）
+      function systemEggMove() {
+        if (!eggGameActive) return;
+
+        // 计算 Nim 和（异或）
+        const xorSum = eggRowsData.reduce((a, b) => a ^ b, 0);
+
+        if (xorSum === 0) {
+          // 必败局面，随便拿一枚（最优策略下已无法避免失败，但系统仍按规则拿）
+          for (let r = 0; r < eggRowsData.length; r++) {
+            if (eggRowsData[r] > 0) {
+              eggRowsData[r] -= 1;
+              break;
+            }
+          }
+        } else {
+          // 必胜策略：找到一行，使其变为 eggRowsData[r] ^ xorSum
+          for (let r = 0; r < eggRowsData.length; r++) {
+            const target = eggRowsData[r] ^ xorSum;
+            if (target < eggRowsData[r]) {
+              eggRowsData[r] = target;
+              break;
+            }
+          }
+        }
+
+        renderEggRows();
+
+        if (checkEggGameOver()) return;
+
+        // 切换回玩家回合
+        eggPlayerTurn = true;
+        eggThinking = false;
+      }
+
+      // 检查彩蛋游戏是否结束
+      function checkEggGameOver() {
+        const total = eggRowsData.reduce((a, b) => a + b, 0);
+        if (total === 0) {
+          eggGameActive = false;
+          eggThinking = false;
+          // 系统拿到最后一枚（因为系统后手必胜），弹出弹窗
+          setTimeout(() => {
+            eggModal.classList.remove('hidden');
+          }, 500);
+          return true;
+        }
+        return false;
+      }
+
+      // 关闭彩蛋弹窗，回到开始界面
+      function closeEggModal() {
+        eggModal.classList.add('hidden');
+        resetToStart();
+      }
+
+      // ===================== 事件绑定 =====================
 
       // 档位按钮事件
       tierButtons.forEach(btn => {
@@ -933,9 +1172,19 @@
         });
       });
 
-      // 按钮事件
-      hardResetBtn.addEventListener('click', hardReset);
+      // 彩蛋按钮
+      eggBtn.addEventListener('click', () => {
+        if (currentScore < 1) {
+          eggBtn.style.transform = 'scale(0.95)';
+          setTimeout(() => eggBtn.style.transform = '', 150);
+          return;
+        }
+        startEggGame();
+      });
+
+      // 弹窗按钮
       modalCloseBtn.addEventListener('click', closeModalAndReset);
+      eggModalCloseBtn.addEventListener('click', closeEggModal);
 
       // 初始化
       initCollectionGrid();
